@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>All Entries</h1>
+
+    <p id="entries">Entries will be loaded here</p>
+</body>
+<script>
+    getData()
+
+    async function getData(){
+        const response = await fetch('/api')
+        const data = await response.json()
+
+        for (item of data){
+            const root = document.createElement('div')
+
+            const user_name = document.createElement('div')
+            user_name.textContent = `User: ${item.user_name}`
+
+            const geo = document.createElement('div')
+            const dateString = new Date(item.timestamp).toLocaleString()
+            geo.textContent = `geo: ${item.lat}, ${item.lon} rec @ ${dateString}`
+            
+            const image = document.createElement('img')
+            image.src = item.image64
+
+            root.append(user_name, geo, image)
+            document.getElementById('entries').appendChild(root)
+        }
+
+        console.log(data)
+    }
+</script>
+</html>

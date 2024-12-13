@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"></script>
+
+</head>
+<body>
+    <h1>Signup</h1>
+
+    <p id="container">Entries will be loaded here</p>
+    <input type="text" id="user_name" placeholder="Your name goes here"><button id="sendbtn">Send Info to Server</button>
+
+</body>
+<script>
+    const container = document.getElementById('container')
+    const sendbtn = document.getElementById('sendbtn')
+    let lat, lon
+    if ("geolocation" in navigator) {
+        console.log('geo no.')
+        function setup(){
+            const video = createCapture(VIDEO)
+            navigator.geolocation.getCurrentPosition(position => {
+                lat = position.coords.latitude
+                lon = position.coords.longitude
+                console.log(lat,lon)
+    
+                container.textContent = `Lat: ${lat}, Lon: ${lon}`
+            })
+            noCanvas();video.size(320, 240)
+
+            sendbtn.addEventListener('click', async event =>{
+                const user_name = document.getElementById('user_name').value
+                video.loadPixels();
+                const image64 = video.canvas.toDataURL()
+                const data = { lat, lon, user_name, image64 }
+
+                const options = {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                }
+                console.log(data)
+                const response = await fetch('/api', options)
+                const json = await response.json()
+                console.log(json)
+            })
+
+
+        } 
+    
+    } else {
+        console.log('geo yas.')
+    }
+</script>
+</html>

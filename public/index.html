@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        if (!"geolocation" in navigator) {
+            console.log('geo no.')
+        } else {
+            console.log('geo yas.')
+        }
+    </script>
+</head>
+<body>
+
+    <input type="text" id="userNam" placeholder="Your name goes here"><button id="sendbtn">Send Info to Server</button>
+    <div id="map" style="width: 100%; height: 80vh; top: 100px"></div>
+    <script>
+        const sendbtn = document.getElementById('sendbtn')
+        var map = L.map('map').fitWorld();
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap'}).addTo(map);
+        
+        map.locate({setView: true, maxZoom: 16});
+
+        function onLocationFound(e) {
+            var radius = e.accuracy;
+            var coord = e.latlng
+            L.marker(coord).addTo(map)
+                .bindPopup("You are within " + radius + " meters from this point").openPopup();
+        
+            L.circle(coord, radius).addTo(map);
+
+            sendbtn.addEventListener('click', function(){
+                const userNam = document.getElementById('userNam').value
+                if (userNam != 0) {
+                    coord.user_name = userNam
+                    console.log(userNam)
+                    console.log(coord)
+                }else {console.log('add your username');return}
+                sendGeoToServer(coord) 
+            })
+        }
+        function onLocationError(e) {
+            alert(e.message);
+        }
+        
+        async function sendGeoToServer(c){
+            const response = await fetch('/api', {
+                method: "POST",
+                headers: {"Content-Type": "application/json",},
+                body: JSON.stringify(c)
+            })
+            const json = await response.json()
+            console.log(json)
+        }
+        map.on('locationerror', onLocationError);   
+        map.on('locationfound', onLocationFound);
+    </script>
+</body>
+</html>
